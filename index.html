@@ -1,66 +1,205 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8" />
-	<title>小人推箱子</title>
-	<link rel="stylesheet" type="text/css" href="css/pushBox.css" />
+	<meta charset="UTF-8">
+	<title>贪吃蛇</title>
 </head>
 <body>
+	<canvas id="canvas">你的浏览器不支持canvas</canvas>
 
-	<div class="game">
+	<button id="bth1" onclick="playgame(1)">开始游戏</button>
+	<button id="bth2" onclick="playgame(0)">重置游戏</button>
+
+	<h2>按s键开始游戏/游戏加速</h2>
+	<h4>得分:<span id="number">0</span></h4>
+
+	<script type="text/javascript">
+		var canvas = document.getElementById('canvas');
+		var btn1 = document.getElementById('bth1');
+		var btn2 = document.getElementById('bth2');
+		var number = document.getElementById('number');
+		canvas.width = 400;
+		canvas.height = 400;
+		canvas.style.border = "2px solid #ddd";
+
+		var map=[];
+		// 记录蛇的运动路径
+		var x=y=8;
+
+		// 记录一个食物坐标;
+		var a=b =0;
+		// 蛇身单位大小
+		var size = 8;
+		// 定义一个蛇身长度
+		var len = 10;
+		// 初始化,蛇身方向向右边
+		var code=2;
+
+		var ctx = canvas.getContext('2d');
+		var play;
+		var plays;
 		
-		<div class="game-map gaming">
-			<!-- 游戏地图区域 -->
-			<canvas id="canvas" width="560" height="560"></canvas>
-		</div>
+		// 开关
+		var toggle = true;
+		var flag = true;
+
+		var s =false;
+
+
+			document.onkeydown = function(e){
+			var key = e.keyCode - 37;
+			console.log(key);
+			// 方向不是向右 才能按左键盘
+			if (key == 0&&code != 2) {
+				code = key;
+			}else if(key == 1 && code !=3){
+				code = key;
+			}else if (key == 2 && code != 0){
+				code = key;
+			}else if(key == 3 && code!=1){
+				code = key;
+			}else if(s && key == 46){
+				clearInterval(play);
+				plays= setInterval(setGame,30);
+				// play = setInterval(setGame,100)
+				s=false;
+			}
+
+		}
+		// 加速逻辑
+		document.onkeyup = function(e){
+			
+			var key = e.keyCode - 37;
+			if(key == 46){
+				s=true;
+				clearInterval(plays);
+				if (flag) {
+					rand();
+				}
+				flag=false;
+				play = setInterval(setGame,100);
+			}
+				btn1.innerHTML="暂停游戏";
+				toggle = false;
+		}
+		// 游戏开始和暂停控制
+		function playgame(i){
+			if (flag) {
+				rand();
+			}
+			flag=false;
+			if (i && toggle) {
+				// rand();
+				toggle = false;
+				s=true;
+				play= setInterval(setGame,100)
+				btn1.innerHTML="暂停游戏";
+
+			}else if(!toggle && i!=0){
+				btn1.innerHTML="开始游戏";
+				toggle= true;
+				clearInterval(play);
+
+		
+				// ctx.clearRect(a,b,size,size);
+			}
+			// 重置游戏
+			else if(i == 0){
+				toggle = true;
+				flag = true;
+				len = 10;
+				code=2;
+				map=[];
+				x=y=8;
+				clearInterval(play);
+				ctx.clearRect(0,0,400,400);
+				flag=true;
+				s=true;
+				btn1.innerHTML="开始游戏";
+				number.innerHTML="0";
+
+			}
+			
+		}
+		// 计时器
 		
 
-		<!-- 关卡序号，人物移动次数信息 -->
-		<div id="msg" class="game-info gaming">
-			<ul class="game-info-list">
-				<li>
-					<i class="nail nail1"></i>
-					<i class="nail nail2"></i>
-					<div class="card-box">
-						<span class="card-title card">目前关卡</span><span id="cardCount" class="card-count card">1</span>
-					</div>
-				</li>
-				<li class="list">
-					<i class="nail list1"></i>
-					<div class="pass-btn">
-						<span class="step-count">移动步数</span>
-						<span id="stepCount">0</span>
-					</div>
-				</li>
-				<li id="-1" class="list level">
-					<i class="nail list1"></i>
-					<div class="pass-btn">上一关</div>
-				</li>
-				<li id="1" class="list level">
-					<i class="nail list1"></i>
-					<div class="pass-btn">下一关</div>
-				</li>
-				<li id="0" class="list level">
-					<i class="nail list1"></i>
-					<div class="pass-btn">重玩本关</div>
-				</li>
-				<li class="list">
-					<i class="nail list1"></i>
-					<div id="gameIntroduce" class="pass-btn">游戏说明</div>
-				</li>
-			</ul>
-		</div>
+		// 蛇身运动
+		function setGame(){
+		// 循环
+			switch(code){
+				// 左
+				case 0:x-=size;break;
+				// 上
+				case 1:y-=size;break;
+				// 右
+				case 2:x+=size;break;
+				// 下
+				case 3:y+=size;break;
+			}	
+			
+			ctx.fillStyle='#069';
+			ctx.strokeStyle='#069';
+			ctx.fillRect(x,y,size,size);
 
-		<div id="layer" class="layer">
-			<div class="layer-box">
-				<div>请按键盘方向键(上下左右箭头)进行移动人物</div>
-				<div id="know" class="know">知道了</div>
-			</div>
-		</div>
+			// 把蛇身的位置存储到数组中,记录蛇身每一个矩形x,y轴位置
+			map.push({'x':x,'y':y});
 
-	</div>
+			if(map.length>len){
+				// 如果超出蛇身长度，删除数组的第一项
+				var del = map.shift();//删除数组第一项，并且返回值
+			
+				ctx.clearRect(del.x,del.y,size,size);
+			}
 
-	<script type="text/javascript" src="./js/mapdata.js"></script>
-	<script type="text/javascript" src="./js/game.js"></script>
+
+			// 吃食物判断
+			if(a == x && b == y){
+				len++;
+				
+				rand();
+				number.innerHTML=len-10;
+			}
+
+				// 遍历整个蛇身的坐标
+			for(var i = 0 ; i<map.length-1 ; i++){
+				// 只要有一个坐标等于头部，即为触碰到自己
+				if (map[i].x == x && map[i].y == y) {
+					alert('碰撞到自己。。');
+					window.location.reload();
+				}
+				// 判断随机生成的食物是否在自己身上
+				if(map[i].x == a && map[i].y == b){
+					rand();
+				}
+			}
+
+			if (x>400-size || x<0 ||y>400-size ||y<0) {
+				alert('碰撞到墙壁。。');
+				window.location.reload();
+			}
+
+		}
+
+		// 通过键盘事件控制蛇的运行方向
+		/*
+			方向键(←)： VK_LEFT (37)
+			方向键(↑)： VK_UP (38)
+			方向键(→)： VK_RIGHT (39)
+			方向键(↓)： VK_DOWN (40)
+		*/
+		
+
+
+
+		// 投放食物
+		function rand(){
+			a = Math.ceil(Math.random()*49)*8;
+			b = Math.ceil(Math.random()*49)*8;
+			ctx.fillStyle="#000";
+			ctx.fillRect(a,b,size,size);
+		}
+
+	</script>
 </body>
 </html>
